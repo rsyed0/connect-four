@@ -22,7 +22,7 @@ public class ConnectFour extends JFrame{
 		}
 		
 		setSize(700,735);
-		setLocation(400,0);
+		setLocation(400,100);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		ConnectFourPanel panel = new ConnectFourPanel();
 		setContentPane(panel);
@@ -78,6 +78,7 @@ class ConnectFourPanel extends JPanel implements MouseListener,MouseMotionListen
 		col = 0;
 		reset.setVisible(false);
 		quit.setVisible(false);
+		new CheckGameOverThread().start();
 		
 		repaint();
 		
@@ -147,8 +148,9 @@ class ConnectFourPanel extends JPanel implements MouseListener,MouseMotionListen
 	public boolean gameOver(){
 		
 		int consec = 0;
-		boolean parsingRed = false;
+		boolean parsingRed = false,allFull = true;
 		
+		// check if all filled
 		// vertical parser
 		for (int c=0;c<7;c++){
 			for (int r=0;r<6;r++){
@@ -160,12 +162,16 @@ class ConnectFourPanel extends JPanel implements MouseListener,MouseMotionListen
 					}
 				} catch (NullPointerException e){
 					consec = 0;
+					allFull = false;
 				}
 				if (consec == 4) return true;
 			}
 		}
 		
+		if (allFull) return true;
+		
 		consec = 0;
+		parsingRed = false;
 		
 		// horizontal parser
 		for (int r=0;r<6;r++){
@@ -185,6 +191,8 @@ class ConnectFourPanel extends JPanel implements MouseListener,MouseMotionListen
 		
 		// diagonal parser
 		
+		
+		
 		return false;
 		
 	}
@@ -192,14 +200,14 @@ class ConnectFourPanel extends JPanel implements MouseListener,MouseMotionListen
 	public void mouseClicked(MouseEvent e) {
 		
 		int row = 0,col = e.getX()/100;
-		
+
 		for (row = 5;row >= 0;row--){
 			try{
 				board[col][row].equals(null);
 			} catch (NullPointerException exc){break;}
 		}
 		
-		//System.out.println("R: "+(row+1)+", C: "+(col+1));
+		System.out.println(moveAllowed);
 		
 		if (row != -1 && moveAllowed){
 			board[col][row] = new ConnectFourPiece(col,row,redTurn);
@@ -214,13 +222,11 @@ class ConnectFourPanel extends JPanel implements MouseListener,MouseMotionListen
 		
 		public void run(){
 			
-			while (true){
-				if (gameOver()){
-					reset.setVisible(true);
-					quit.setVisible(true);
-					moveAllowed = false;
-				}
-			}
+			while (!gameOver()){/* block */}
+			
+			moveAllowed = false;
+			reset.setVisible(true);
+			quit.setVisible(true);
 			
 		}
 		
